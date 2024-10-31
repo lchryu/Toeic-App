@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Quiz Dynamic</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TOEIC Quiz</h1>
+        <div class="file-upload">
+            <input type="file" id="answerFile" accept=".txt">
+            <div id="uploadStatus"></div>
+        </div>
+        <div id="timer" class="timer">00:00:00</div>
+        <form id="quizForm">
+            <div id="questionsContainer" class="questions-container">
+                <!-- Câu hỏi sẽ được tạo động ở đây -->
+            </div>
+            <div class="button-group">
+                <button type="button" id="startBtn" onclick="startQuiz()" style="display: none;">Bắt đầu làm bài</button>
+                <button type="button" id="submitBtn" onclick="checkAnswers()" style="display: none;">Nộp bài</button>
+                <button type="button" id="resetBtn" onclick="resetQuiz()" style="display: none;">Làm lại</button>
+            </div>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        let correctAnswers = {};
+        let timerInterval;
+        let startTime;
+        let isQuizStarted = false;
+
+        document.getElementById('answerFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const lines = e.target.result.split('\n');
+                    correctAnswers = {};
+                    
+                    lines.forEach((line, index) => {
+                        const answer = line.trim().toLowerCase();
+                        if (answer) {
+                            correctAnswers['q' + (index + 1)] = answer;
+                        }
+                    });
+
+                    generateQuestions(Object.keys(correctAnswers).length);
+                    
+                    document.getElementById('uploadStatus').innerHTML = 
+                        `<span style="color: green;">✓ Đã tải lên ${Object.keys(correctAnswers).length} đáp án</span>`;
+                    document.getElementById('startBtn').style.display = 'block';
+                    resetQuiz();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function startQuiz() {
+            isQuizStarted = true;
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('answerFile').disabled = true;
+            
+            // Enable all radio buttons
+            enableQuizInputs(true);
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const now = new Date();
+            const diff = now - startTime;
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function generateQuestions(count) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= count; i++) {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <p><strong>Câu ${i}:</strong></p>
+                    <div class="options">
+                        <label><input type="radio" name="q${i}" value="a" disabled> A</label>
+                        <label><input type="radio" name="q${i}" value="b" disabled> B</label>
+                        <label><input type="radio" name="q${i}" value="c" disabled> C</label>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            }
+        }
+
+        function enableQuizInputs(enable) {
+            const inputs = document.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                input.disabled = !enable;
+            });
+        }
+
+        function checkAnswers() {
+            if (!isQuizStarted) {
+                alert('Vui lòng bắt đầu bài thi trước!');
+                return;
+            }
+
+            clearInterval(timerInterval);
+            const endTime = new Date();
+            const timeSpent = endTime - startTime;
+            const hours = Math.floor(timeSpent / 3600000);
+            const minutes = Math.floor((timeSpent % 3600000) / 60000);
+            const seconds = Math.floor((timeSpent % 60000) / 1000);
+
+            let score = 0;
+            let totalQuestions = Object.keys(correctAnswers).length;
+            let resultDiv = document.getElementById('result');
+            let incorrectAnswers = [];
+
+            for (let [question, correctAnswer] of Object.entries(correctAnswers)) {
+                let selected = document.querySelector(`input[name="${question}"]:checked`);
+                if (selected) {
+                    if (selected.value === correctAnswer) {
+                        score++;
+                    } else {
+                        incorrectAnswers.push({
+                            question: question.slice(1),
+                            selected: selected.value.toUpperCase(),
+                            correct: correctAnswer.toUpperCase()
+                        });
+                    }
+                } else {
+                    incorrectAnswers.push({
+                        question: question.slice(1),
+                        selected: '(chưa chọn)',
+                        correct: correctAnswer.toUpperCase()
+                    });
+                }
+            }
+
+            let resultHTML = `
+                <div class="summary">
+                    <p class="correct">Kết quả: ${score}/${totalQuestions} câu đúng (${Math.round(score/totalQuestions*100)}%)</p>
+                    <p>Thời gian làm bài: ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</p>
+                </div>`;
+
+            if (incorrectAnswers.length > 0) {
+                resultHTML += '<h3>Các câu trả lời sai:</h3>';
+                incorrectAnswers.forEach(answer => {
+                    resultHTML += `
+                        <p class="incorrect">
+                            Câu ${answer.question}: 
+                            Bạn chọn ${answer.selected}, 
+                            Đáp án đúng: ${answer.correct}
+                        </p>`;
+                });
+            }
+
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.style.display = 'block';
+            
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'block';
+            
+            // Disable all radio buttons after submission
+            enableQuizInputs(false);
+        }
+
+        function resetQuiz() {
+            // Reset timer
+            clearInterval(timerInterval);
+            startTime = null;
+            document.getElementById('timer').textContent = '00:00:00';
+            
+            // Reset form
+            document.getElementById('quizForm').reset();
+            document.getElementById('result').style.display = 'none';
+            
+            // Reset buttons
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'none';
+            
+            // Enable file input
+            document.getElementById('answerFile').disabled = false;
+            
+            // Disable all radio buttons
+            enableQuizInputs(false);
+            
+            isQuizStarted = false;
+        }
+    </script>
+</body>
+</html>
