@@ -17,25 +17,38 @@ function render() {
 
 function renderLogin() {
   appDiv.innerHTML = `
-    <div class="auth-container glass-panel">
-      <h1>Premium Auto-Checker</h1>
+    <div class="auth-container glass-panel" style="padding: 2.5rem 2rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="margin-bottom: 0.5rem; font-size: 2.2rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🎯 TOEIC 900+</h1>
+        <p class="text-secondary" style="font-size: 0.95rem;">High-Speed Automated Answer Checker</p>
+      </div>
+      
       <form id="loginForm">
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="email" class="form-control" required placeholder="admin@example.com">
+          <label style="font-weight: 500;">Email Address</label>
+          <input type="email" id="email" class="form-control w-100" required placeholder="name@example.com" style="padding: 12px; border-radius: 10px;">
         </div>
         <div class="form-group">
-          <label>Mật khẩu (Tối thiểu 6 ký tự)</label>
-          <input type="password" id="password" class="form-control" required placeholder="********">
+          <label style="font-weight: 500;">Password</label>
+          <input type="password" id="password" class="form-control w-100" required placeholder="********" style="padding: 12px; border-radius: 10px;">
         </div>
-        <div id="errorMsg" class="text-danger text-center"></div>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-          <button type="submit" class="btn btn-primary">Vào Trạm</button>
-          <button type="button" id="registerBtn" class="btn btn-primary" style="background-color: var(--success-color); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);">Tạo Tài Khoản</button>
+        
+        <div id="errorMsg" class="text-danger text-center" style="min-height: 20px; margin-bottom: 10px;"></div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-primary w-100" style="padding: 12px; font-weight: 600; border-radius: 10px;">Sign In</button>
+          <button type="button" id="registerBtn" class="btn btn-outline" style="width: auto; padding: 12px; border-radius: 10px; white-space: nowrap;">Sign Up</button>
         </div>
-        <button type="button" id="googleBtn" class="btn mt-4" style="background-color: white; color: #333; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; gap: 10px;">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
-          Đăng nhập bằng Google
+        
+        <div style="display: flex; align-items: center; margin: 1.5rem 0; color: var(--text-secondary);">
+          <div style="flex-grow: 1; height: 1px; background: var(--surface-border);"></div>
+          <span style="padding: 0 15px; font-size: 0.85rem; font-weight: 500;">OR CONTINUE WITH</span>
+          <div style="flex-grow: 1; height: 1px; background: var(--surface-border);"></div>
+        </div>
+        
+        <button type="button" id="googleBtn" class="btn btn-google w-100" style="padding: 12px; border-radius: 10px; font-weight: 600; transition: transform 0.2s;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="22">
+          Continue with Google
         </button>
       </form>
     </div>
@@ -107,13 +120,27 @@ function renderDashboard() {
           
           <div style="margin-bottom: 1rem;">
              <label for="quizNote" style="font-size: 0.9rem; color: var(--text-secondary);">Ghi chú đính kèm (vd: Link giải chi tiết, PDF...)</label>
-             <input type="text" id="quizNote" class="form-control" placeholder="Dán link hoặc ghi chú vào đây (tùy chọn)">
+             <input type="text" id="quizNote" class="form-control w-100" placeholder="Dán link hoặc ghi chú vào đây (tùy chọn)">
           </div>
 
-          <div id="uploadZone" style="border: 2px dashed var(--surface-border); padding: 3rem 1rem; text-align: center; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
-            <p>Kéo thả file đáp án (.txt) vào đây<br><span style="font-size: 0.85rem; color: var(--text-secondary)">Số lượng câu tự động đếm (Ví dụ: 10 câu, 200 câu)</span></p>
-            <input type="file" id="fileInput" accept=".txt" style="display:none;">
+          <div id="uploadZone" style="border: 2px dashed var(--surface-border); padding: 2rem; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.2);">
+            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Kéo & Thả File Thay Key (.TXT)</h3>
+            <p class="text-secondary" style="font-size: 0.9rem;">(Mỗi hàng 1 kí tự A/B/C/D. VD: Dòng 1 ghi 'A', dòng 2 ghi 'B')</p>
+            <button class="btn w-100 mt-4" style="color: white; background: rgba(255,255,255,0.05); border: 1px dashed var(--text-secondary); pointer-events: none;">📎 Click để chọn file tử thiết bị</button>
+            <input type="file" id="fileInput" accept=".txt" style="display: none;">
           </div>
+          
+          <div class="mt-4">
+             <details style="background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--surface-border);">
+               <summary style="cursor: pointer; color: var(--primary-color); font-weight: bold; outline: none; user-select: none;">✍️ Hoặc: Tạo Đề Thủ Công (Cho Mobile)</summary>
+               <div style="margin-top: 1rem;">
+                  <input type="text" id="manualTitle" class="form-control w-100" placeholder="Tên đề (Bắt buộc, VD: Luyện Tập Tay)">
+                  <textarea id="manualAnswers" class="form-control w-100 mt-2" rows="6" placeholder="Nhập đáp án (A,B,C,D):&#10;a&#10;b&#10;c&#10;d"></textarea>
+                  <button id="btnManualUpload" class="btn w-100 mt-2" style="background-color: var(--success-color); color: white;">Lưu Đề Này</button>
+               </div>
+             </details>
+          </div>
+
           <div id="uploadStatus" class="mt-4 text-center"></div>
         </div>
         ` : ''}
@@ -164,6 +191,55 @@ function setupDragAndDrop() {
       handleFileUpload(e.dataTransfer.files[0]);
     }
   });
+
+  const btnManualUpload = document.getElementById('btnManualUpload');
+  if (btnManualUpload) {
+    btnManualUpload.addEventListener('click', async () => {
+      const title = document.getElementById('manualTitle').value.trim();
+      const text = document.getElementById('manualAnswers').value.trim();
+      const status = document.getElementById('uploadStatus');
+      
+      if (!title) return alert("Vui lòng đặt tên cho đề!");
+      if (!text) return alert("Vui lòng nhập bèo nhất 1 câu đáp án!");
+      
+      const lines = text.split('\n');
+      let answers = [];
+      lines.forEach((line) => {
+        const char = line.trim().toLowerCase();
+        if (['a', 'b', 'c', 'd'].includes(char)) answers.push(char);
+      });
+      
+      if (answers.length === 0) return alert("Không tìm thấy ký tự A,B,C,D nào hợp lệ!");
+      
+      btnManualUpload.textContent = "Đang lưu DB...";
+      status.innerHTML = `<span style="color: var(--primary-color);">Đang đẩy lên mạng...</span>`;
+      
+      const noteEl = document.getElementById('quizNote');
+      const noteVal = noteEl ? noteEl.value.trim() : '';
+      
+      const quizData = {
+        title: title,
+        note: noteVal,
+        answers: answers,
+        questionCount: answers.length,
+        createdAt: Timestamp.now(),
+        createdBy: currentUser.uid
+      };
+
+      try {
+        await addDoc(collection(db, "quizzes"), quizData);
+        status.innerHTML = `<span style="color: var(--success-color);">Lưu thành công đề: ${title}!</span>`;
+        if (noteEl) noteEl.value = '';
+        document.getElementById('manualTitle').value = '';
+        document.getElementById('manualAnswers').value = '';
+        loadQuizzes();
+      } catch (err) {
+        status.innerHTML = `<span class="text-danger">Lỗi: ${err.message}</span>`;
+      } finally {
+        btnManualUpload.textContent = "Lưu Đề Này";
+      }
+    });
+  }
 }
 
 async function handleFileUpload(file) {
@@ -249,7 +325,7 @@ async function loadQuizzes() {
           </div>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
             <button class="btn btn-primary" onclick="window.handleStartQuiz('${doc.id}', '${data.title.replace(/'/g, "\\'")}')" style="font-size: 0.85rem; padding: 0.5rem; flex: 1;">[ Bắt Đầu Chấm ]</button>
-            <button class="btn" onclick="window.openComments('${doc.id}', '${data.title.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.1); border: 1px solid var(--surface-border); font-size: 1.2rem; padding: 0.5rem;">💬</button>
+            <button class="btn" onclick="window.openComments('${doc.id}', '${data.title.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.1); border: 1px solid var(--surface-border); font-size: 1.2rem; padding: 0.5rem 0.8rem; flex-shrink: 0;">💬</button>
           </div>
           ${adminButtons}
         </div>
@@ -330,7 +406,7 @@ function renderEditQuiz(quizId) {
               <small class="text-secondary mt-2" style="display:block;">Gõ lại A, B, C hoặc D. Chữ sẽ tự động bự lên. Tính năng này dùng để sửa lỗi sai sót từng câu (VD: Xoá B gõ C). Nếu muốn sửa lại cả 200 câu, khuyên mày nên Xoá bài này và nạp kéo-thả file gốc lên lại cho lẹ!</small>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="background-color: var(--success-color);">Lưu Lại Ngay</button>
+            <button type="submit" class="btn btn-primary w-100" style="background-color: var(--success-color);">Lưu Lại Ngay</button>
           </form>
         </div>
       </div>
