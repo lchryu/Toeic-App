@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Quiz Dynamic</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TOEIC Quiz</h1>
+        <div class="quiz-setup">
+            <div class="setup-section">
+                <h2>Chọn bộ đề</h2>
+                <select id="quizSelect">
+                    <option value="">-- Chọn bộ đề --</option>
+                </select>
+            </div>
+            
+            <div class="setup-divider">
+                <span>hoặc</span>
+            </div>
+            
+            <div class="setup-section">
+                <h2>Tải lên file đáp án</h2>
+                <div class="upload-zone">
+                    <input type="file" id="answerFile" accept=".txt">
+                    <label for="answerFile">
+                        <i class="fas fa-upload"></i>
+                        <span>Chọn file .txt</span>
+                    </label>
+                </div>
+                <div id="uploadStatus"></div>
+            </div>
+        </div>
+        <div class="quiz-settings">
+            <div class="settings-group">
+                <h3>Chế độ làm bài:</h3>
+                <div class="mode-select">
+                    <label>
+                        <input type="radio" name="quizMode" value="practice" checked>
+                        <span>Luyện tập</span>
+                        <small>Hiển thị đáp án ngay khi chọn</small>
+                    </label>
+                    <label>
+                        <input type="radio" name="quizMode" value="exam">
+                        <span>Thi</span>
+                        <small>Chỉ hiện kết quả khi nộp bài</small>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Đồng hồ:</h3>
+                <label class="timer-toggle">
+                    <input type="checkbox" id="showTimer" checked>
+                    <span>Hiển thị đồng hồ đếm giờ</span>
+                </label>
+            </div>
+        </div>
+        <div id="timer" class="timer">00:00:00</div>
+        <form id="quizForm">
+            <div id="questionsContainer" class="questions-container">
+                <!-- Câu hỏi sẽ được tạo động ở đây -->
+            </div>
+            <div class="button-group">
+                <button type="button" id="startBtn" onclick="startQuiz()" style="display: none;">Bắt đầu làm bài</button>
+                <button type="button" id="submitBtn" onclick="checkAnswers()" style="display: none;">Nộp bài</button>
+                <button type="button" id="resetBtn" onclick="resetQuiz()" style="display: none;">Làm lại</button>
+            </div>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

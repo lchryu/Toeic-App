@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Quiz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .upload-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .upload-zone:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        .question {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .question:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .correct-answer {
+            background-color: rgba(25, 135, 84, 0.1) !important;
+            border-color: #198754 !important;
+        }
+        
+        .wrong-answer {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+            border-color: #dc3545 !important;
+        }
+        
+        .correct-option {
+            background-color: rgba(25, 135, 84, 0.2) !important;
+            border-color: #198754 !important;
+            color: #198754 !important;
+            font-weight: 500;
+        }
+        
+        .wrong-option {
+            background-color: rgba(220, 53, 69, 0.2) !important;
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+            text-decoration: line-through;
+        }
+        
+        .questions-container {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .quiz-setup-divider {
+                width: 100%;
+                text-align: center;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">TOEIC Quiz</h1>
+
+                <!-- Quiz Setup -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-5">
+                                <h5 class="card-title">Chọn bộ đề</h5>
+                                <select id="quizSelect" class="form-select">
+                                    <option selected disabled>-- Chọn bộ đề --</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                <div class="quiz-setup-divider text-muted">hoặc</div>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <h5 class="card-title">Tải lên file đáp án</h5>
+                                <div class="upload-zone" onclick="document.getElementById('answerFile').click()">
+                                    <input type="file" id="answerFile" class="d-none" accept=".txt">
+                                    <p class="mb-0">Chọn file .txt</p>
+                                </div>
+                                <div id="uploadStatus" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Settings -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <h5 class="card-title">Chế độ làm bài:</h5>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="quizMode" id="practiceMode" value="practice" checked>
+                                        <label class="form-check-label" for="practiceMode">
+                                            <strong>Luyện tập</strong><br>
+                                            <small class="text-muted">Hiển thị đáp án ngay khi chọn</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="quizMode" id="examMode" value="exam">
+                                        <label class="form-check-label" for="examMode">
+                                            <strong>Thi</strong><br>
+                                            <small class="text-muted">Chỉ hiện kết quả khi nộp bài</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h5 class="card-title">Đồng hồ:</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="showTimer">
+                                    <label class="form-check-label" for="showTimer">
+                                        Hiển thị đồng hồ đếm giờ
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div id="timer" class="alert alert-secondary text-center fw-bold mb-4 d-none">
+                    00:00:00
+                </div>
+
+                <!-- Questions -->
+                <div id="questionsContainer" class="questions-container mb-4"></div>
+
+                <!-- Buttons -->
+                <div class="d-flex gap-2">
+                    <button id="startBtn" class="btn btn-primary flex-grow-1 d-none">Bắt đầu làm bài</button>
+                    <button id="submitBtn" class="btn btn-success flex-grow-1 d-none">Nộp bài</button>
+                    <button id="resetBtn" class="btn btn-danger flex-grow-1 d-none">Làm lại</button>
+                </div>
+
+                <!-- Results -->
+                <div id="result" class="mt-4 d-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let correctAnswers = {};
+        let timerInterval;
+        let startTime;
+        let isQuizStarted = false;
+        let isPracticeMode = true;
+
+        async function initializeQuizzes() {
+            try {
+                const response = await fetch('http://localhost:8000/list-quizzes');
+                const quizFiles = await response.json();
+                
+                const select = document.getElementById('quizSelect');
+                
+                quizFiles.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file;
+                    const displayName = file
+                        .replace('.txt', '')
+                        .replace(/test\s*số\s*/i, 'Test số ')
+                        .replace(/test\s*/i, 'Test số ')
+                        .replace(/(\d+)$/, (match) => match.padStart(2, '0'));
+                    option.textContent = displayName;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Không thể tải danh sách bộ đề:', error);
+            }
+        }
+
+        document.getElementById('quizSelect').addEventListener('change', async function(event) {
+            if (event.target.value) {
+                try {
+                    const response = await fetch(`quiz-folder/${event.target.value}`);
+                    const text = await response.text();
+                    const lines = text.split('\n');
+                    correctAnswers = {};
+                    
+                    lines.forEach((line, index) => {
+                        const answer = line.trim().toLowerCase();
+                        if (answer) {
+                            correctAnswers['q' + (index + 1)] = answer;
+                        }
+                    });
+
+                    generateQuestions(Object.keys(correctAnswers).length);
+                    
+                    document.getElementById('uploadStatus').innerHTML = 
+                        `<div class="alert alert-success mb-0">✓ Đã tải ${Object.keys(correctAnswers).length} câu hỏi</div>`;
+                    document.getElementById('startBtn').classList.remove('d-none');
+                    resetQuiz();
+                } catch (error) {
+                    console.error('Không thể tải bộ đề:', error);
+                    document.getElementById('uploadStatus').innerHTML = 
+                        `<div class="alert alert-danger mb-0">✗ Lỗi khi tải bộ đề</div>`;
+                }
+            }
+        });
+
+        document.getElementById('answerFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const lines = e.target.result.split('\n');
+                    correctAnswers = {};
+                    
+                    lines.forEach((line, index) => {
+                        const answer = line.trim().toLowerCase();
+                        if (answer) {
+                            correctAnswers['q' + (index + 1)] = answer;
+                        }
+                    });
+
+                    generateQuestions(Object.keys(correctAnswers).length);
+                    
+                    document.getElementById('uploadStatus').innerHTML = 
+                        `<div class="alert alert-success mb-0">✓ Đã tải lên ${Object.keys(correctAnswers).length} đáp án</div>`;
+                    document.getElementById('startBtn').classList.remove('d-none');
+                    resetQuiz();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                isPracticeMode = this.value === 'practice';
+                
+                if (isQuizStarted) {
+                    const questionCount = Object.keys(correctAnswers).length;
+                    generateQuestions(questionCount);
+                    enableQuizInputs(true);
+                    
+                    document.getElementById('submitBtn').classList.toggle('d-none', isPracticeMode);
+                }
+            });
+        });
+
+        document.getElementById('showTimer').addEventListener('change', function() {
+            document.getElementById('timer').classList.toggle('d-none', !this.checked);
+        });
+
+        function startQuiz() {
+            isQuizStarted = true;
+            startTime = new Date();
+            
+            if (document.getElementById('showTimer').checked) {
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            document.getElementById('startBtn').classList.add('d-none');
+            document.getElementById('submitBtn').classList.toggle('d-none', isPracticeMode);
+            document.getElementById('resetBtn').classList.remove('d-none');
+            document.getElementById('answerFile').disabled = true;
+            
+            enableQuizInputs(true);
+            
+            const questionCount = Object.keys(correctAnswers).length;
+            generateQuestions(questionCount);
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const now = new Date();
+            const diff = now - startTime;
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function generateQuestions(count) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= count; i++) {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'card mb-3 question';
+                questionDiv.setAttribute('data-question', `q${i}`);
+                questionDiv.innerHTML = `
+                    <div class="card-body">
+                        <p class="card-title fw-bold mb-3">Câu ${i}:</p>
+                        <div class="row row-cols-1 row-cols-md-4 g-3">
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="q${i}" value="a" id="q${i}a">
+                                    <label class="form-check-label" for="q${i}a">A</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="q${i}" value="b" id="q${i}b">
+                                    <label class="form-check-label" for="q${i}b">B</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="q${i}" value="c" id="q${i}c">
+                                    <label class="form-check-label" for="q${i}c">C</label>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="q${i}" value="d" id="q${i}d">
+                                    <label class="form-check-label" for="q${i}d">D</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+
+                if (isPracticeMode) {
+                    const radios = questionDiv.querySelectorAll('input[type="radio"]');
+                    radios.forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            if (isPracticeMode && isQuizStarted) {
+                                checkAnswerImmediate(this);
+                            }
+                        });
+                    });
+                }
+            }
+
+            if (!isQuizStarted) {
+                enableQuizInputs(false);
+            }
+        }
+
+        function checkAnswerImmediate(radio) {
+            if (!isPracticeMode || !isQuizStarted) return;
+            
+            const questionName = radio.name;
+            const selectedValue = radio.value;
+            const correctAnswer = correctAnswers[questionName];
+            const questionDiv = radio.closest('.question');
+            const allOptions = questionDiv.querySelectorAll('.form-check');
+            
+            // Reset classes
+            questionDiv.classList.remove('correct-answer', 'wrong-answer');
+            allOptions.forEach(option => {
+                option.classList.remove('correct-option', 'wrong-option');
+            });
+        
+            if (selectedValue === correctAnswer) {
+                questionDiv.classList.add('correct-answer');
+                radio.closest('.form-check').classList.add('correct-option');
+            } else {
+                questionDiv.classList.add('wrong-answer');
+                radio.closest('.form-check').classList.add('wrong-option');
+                // Highlight correct answer
+                const correctInput = questionDiv.querySelector(`input[value="${correctAnswer}"]`);
+                correctInput.closest('.form-check').classList.add('correct-option');
+            }
+        }
+        
+        function enableQuizInputs(enable) {
+            const inputs = document.querySelectorAll('.question input[type="radio"]');
+            inputs.forEach(input => {
+                input.disabled = !enable;
+            });
+        }
+        
+        function checkAnswers() {
+            if (!isQuizStarted) {
+                const toast = new bootstrap.Toast(Object.assign(document.createElement('div'), {
+                    className: 'toast align-items-center text-white bg-danger border-0',
+                    innerHTML: `
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Vui lòng bắt đầu bài thi trước!
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `
+                }));
+                document.body.appendChild(toast.element);
+                toast.show();
+                return;
+            }
+        
+            document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
+                radio.disabled = true;
+            });
+        
+            clearInterval(timerInterval);
+            const endTime = new Date();
+            const timeSpent = endTime - startTime;
+            const hours = Math.floor(timeSpent / 3600000);
+            const minutes = Math.floor((timeSpent % 3600000) / 60000);
+            const seconds = Math.floor((timeSpent % 60000) / 1000);
+        
+            let score = 0;
+            let totalQuestions = Object.keys(correctAnswers).length;
+            let resultDiv = document.getElementById('result');
+            let incorrectAnswers = [];
+        
+            for (let [question, correctAnswer] of Object.entries(correctAnswers)) {
+                let selected = document.querySelector(`input[name="${question}"]:checked`);
+                if (selected) {
+                    if (selected.value === correctAnswer) {
+                        score++;
+                    } else {
+                        incorrectAnswers.push({
+                            question: question.slice(1),
+                            selected: selected.value.toUpperCase(),
+                            correct: correctAnswer.toUpperCase()
+                        });
+                    }
+                } else {
+                    incorrectAnswers.push({
+                        question: question.slice(1),
+                        selected: '(chưa chọn)',
+                        correct: correctAnswer.toUpperCase()
+                    });
+                }
+            }
+        
+            let resultHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="alert alert-info mb-4">
+                            <h4 class="alert-heading mb-3">Kết quả: ${score}/${totalQuestions} câu đúng (${Math.round(score/totalQuestions*100)}%)</h4>
+                            <p class="mb-0">Thời gian làm bài: ${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</p>
+                        </div>`;
+        
+            if (incorrectAnswers.length > 0) {
+                resultHTML += `
+                    <h5 class="card-title mb-3">Các câu trả lời sai:</h5>
+                    <div class="list-group">`;
+                
+                incorrectAnswers.forEach(answer => {
+                    resultHTML += `
+                        <div class="list-group-item list-group-item-danger">
+                            Câu ${answer.question}: 
+                            Bạn chọn ${answer.selected}, 
+                            Đáp án đúng: ${answer.correct}
+                        </div>`;
+                });
+                
+                resultHTML += `</div>`;
+            }
+        
+            resultHTML += `</div></div>`;
+        
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.classList.remove('d-none');
+            
+            document.getElementById('submitBtn').classList.add('d-none');
+            document.getElementById('resetBtn').classList.remove('d-none');
+            
+            enableQuizInputs(false);
+        }
+        
+        function resetQuiz() {
+            clearInterval(timerInterval);
+            startTime = null;
+            document.getElementById('timer').textContent = '00:00:00';
+            
+            // Reset form and hide results
+            document.getElementById('quizForm')?.reset();
+            document.getElementById('result').classList.add('d-none');
+            
+            // Reset buttons
+            document.getElementById('startBtn').classList.remove('d-none');
+            document.getElementById('submitBtn').classList.add('d-none');
+            document.getElementById('resetBtn').classList.add('d-none');
+            
+            // Reset file input
+            document.getElementById('answerFile').disabled = false;
+            document.getElementById('answerFile').value = '';
+            
+            // Reset radio buttons
+            document.querySelectorAll('input[name="quizMode"]').forEach(radio => {
+                radio.disabled = false;
+            });
+            
+            enableQuizInputs(false);
+            isQuizStarted = false;
+            
+            const questionCount = Object.keys(correctAnswers).length;
+            generateQuestions(questionCount);
+        }
+        
+        // Add event listeners for buttons
+        document.getElementById('startBtn').addEventListener('click', startQuiz);
+        document.getElementById('submitBtn').addEventListener('click', checkAnswers);
+        document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+        
+        // Initialize tooltips and popovers if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            
+            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    </script>
+</body>
+</html>
